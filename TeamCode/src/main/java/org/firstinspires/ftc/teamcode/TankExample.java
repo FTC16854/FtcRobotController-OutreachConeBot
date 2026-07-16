@@ -29,8 +29,6 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.rev.RevSPARKMini;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -38,9 +36,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 
-import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -98,6 +94,10 @@ public class TankExample extends LinearOpMode {
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Driver Station app or Driver Hub).
         imu = hardwareMap.get(IMU.class, "imu");
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.RIGHT;
+        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.UP;
+        RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
+        imu.initialize(new IMU.Parameters(orientationOnRobot));
 
         rightFront = hardwareMap.get(DcMotor.class, "fr_drive");
         leftFront = hardwareMap.get(DcMotor.class, "fl_drive");
@@ -148,12 +148,11 @@ public class TankExample extends LinearOpMode {
         while (opModeIsActive()) {
 
             tankDrive();
-            gripperControl();
 
 
             telemetry.addData("Lift at bottom: ",liftAtBottom());
             telemetry.addData("Lift Position: ", getLiftPosition());
-//            telemetry.addData("Robot Angle: ",gyroAngle());
+            telemetry.addData("Robot Angle: ",gyroAngle());
             telemetry.update();
         }
     }
@@ -173,10 +172,10 @@ public class TankExample extends LinearOpMode {
     }
 
     public double right_sticky_x(){
-        return gamepad1.left_stick_x;
+        return gamepad1.right_stick_x;
     }
     public double right_sticky_y() {
-        return -gamepad1.left_stick_y;
+        return -gamepad1.right_stick_y;
     }
 
 
@@ -222,7 +221,7 @@ public class TankExample extends LinearOpMode {
         double speed = Math.hypot(left_sticky_x(), left_sticky_y());
         double rotation = right_sticky_x();
 
-        double DriveAngle = Math.atan2(left_sticky_y(), left_sticky_x()) - Math.toRadians(180);
+        double DriveAngle = Math.atan2(left_sticky_y(), left_sticky_x());
 
         double leftFrontSpeed = speed*Math.cos(DriveAngle - (Math.PI/4)) + rotation;
         double rightFrontSpeed = speed*Math.sin(DriveAngle - (Math.PI/4)) - rotation;
@@ -235,11 +234,11 @@ public class TankExample extends LinearOpMode {
         rightBack.setPower(rightBackSpeed);
     }
 
-    public void Field_Centric_drive (){
+    public void fieldCentricOmni(){
         double speed = Math.hypot(left_sticky_x(), left_sticky_y());
         double rotation = right_sticky_x();
 
-        double DriveAngle = Math.atan2(left_sticky_y(), left_sticky_x()) - Math.toRadians(gyroAngle()) - Math.toRadians(180);
+        double DriveAngle = Math.atan2(left_sticky_y(), left_sticky_x()) - Math.toRadians(gyroAngle());
 
         double leftFrontSpeed = speed*Math.cos(DriveAngle - (Math.PI/4)) + rotation;
         double rightFrontSpeed = speed*Math.sin(DriveAngle - (Math.PI/4)) - rotation;
@@ -255,16 +254,6 @@ public class TankExample extends LinearOpMode {
 
     /*****************************/
     //More Methods (Functions)
-
-    public void gripperControl(){
-        if(gamepad1.x){
-            gripperServo.setPosition(0);
-        }
-        if(gamepad1.b){
-            gripperServo.setPosition(0.4);
-
-        }
-    }
 
 
     //Encoder Functions
@@ -302,6 +291,8 @@ public class TankExample extends LinearOpMode {
 
     /*****************************/
     //Gyro Functions
+
+
 
     public double gyroAngle() {
         YawPitchRollAngles YEEHAWOrientation = imu.getRobotYawPitchRollAngles();
