@@ -85,7 +85,7 @@ public class TankExample extends LinearOpMode {
     private Servo gripperServo = null;
 
     private DigitalChannel liftLimitSwitch = null;
-    IMU imu;
+    IMU imu = null;
 
     //Other Global Variables
     //put global variables here...
@@ -97,10 +97,12 @@ public class TankExample extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Driver Station app or Driver Hub).
+        imu = hardwareMap.get(IMU.class, "imu");
+
         rightFront = hardwareMap.get(DcMotor.class, "fr_drive");
         leftFront = hardwareMap.get(DcMotor.class, "fl_drive");
         rightBack = hardwareMap.get(DcMotorSimple.class, "br_drive");
-        leftBack = hardwareMap.get(DcMotorSimple.class, "bl_drive");x
+        leftBack = hardwareMap.get(DcMotorSimple.class, "bl_drive");
 
         lift = hardwareMap.get(DcMotor.class, "lift");
 
@@ -111,10 +113,10 @@ public class TankExample extends LinearOpMode {
         //Set Motor  and servo Directions
         rightFront.setDirection(DcMotor.Direction.REVERSE);
         rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
-        leftFront.setDirection(DcMotor.Direction.REVERSE);
-        leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftFront.setDirection(DcMotor.Direction.FORWARD);
+        leftBack.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        lift.setDirection((DcMotorSimple.Direction.REVERSE));
+        lift.setDirection((DcMotor.Direction.REVERSE));
 
         //Set brake or coast modes. If using combination of SPARK Minis and normal motors (make sure these match)
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); //BRAKE or FLOAT (Coast)
@@ -135,6 +137,7 @@ public class TankExample extends LinearOpMode {
         // Init loop - optional
         while(opModeInInit()){
             // Code in here will loop continuously until OpMode is started
+            liftHoming();
         }
 
         // Wait for the game to start (driver presses PLAY) - May not be needed if using an init Loop
@@ -145,12 +148,16 @@ public class TankExample extends LinearOpMode {
         while (opModeIsActive()) {
 
             tankDrive();
+            gripperControl();
+
 
             telemetry.addData("Lift at bottom: ",liftAtBottom());
-
+            telemetry.addData("Lift Position: ", getLiftPosition());
+//            telemetry.addData("Robot Angle: ",gyroAngle());
             telemetry.update();
         }
     }
+
 
     /*****************************/
     //Controls should be mapped here to avoid accessing gamepad directly in other functions/methods
@@ -228,12 +235,6 @@ public class TankExample extends LinearOpMode {
         rightBack.setPower(rightBackSpeed);
     }
 
-
-
-
-    /*****************************/
-    //More Methods (Functions)
-
     public void Field_Centric_drive (){
         double speed = Math.hypot(left_sticky_x(), left_sticky_y());
         double rotation = right_sticky_x();
@@ -251,36 +252,42 @@ public class TankExample extends LinearOpMode {
         rightBack.setPower(rightBackSpeed);
     }
 
-    public double gyroAngle() {
-        YawPitchRollAngles YEEHAWOrientation = imu.getRobotYawPitchRollAngles();
 
-        return YEEHAWOrientation.getYaw(AngleUnit.DEGREES);
+    /*****************************/
+    //More Methods (Functions)
+
+    public void gripperControl(){
+        if(gamepad1.x){
+            gripperServo.setPosition(0);
+        }
+        if(gamepad1.b){
+            gripperServo.setPosition(0.4);
+
+        }
     }
 
-    /*****************************/
-    //Autonomous Functions
 
-    /*****************************/
     //Encoder Functions
-    public void spinnyHome() {
+    public void liftHoming() {
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         if (liftAtBottom()) {
             lift.setPower(0);
             lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         } else {
-            lift.setPower(0.1);    // Low power/Slow
+            lift.setPower(-0.1);    // Low power/Slow
         }
     }
 
     public boolean liftAtBottom(){
         return liftLimitSwitch.getState();
     }
-   /*
-    public double getEncoder(){
-        return rightFront.getCurrentPosition();
+
+    public int getLiftPosition(){
+        return lift.getCurrentPosition();
     }
-    */
+
+
 
 /*
     public void goToSpinnyPosition(int spinnyGoHere){
@@ -292,19 +299,14 @@ public class TankExample extends LinearOpMode {
         telemetry.addData("motor tick target position", spinnyGoHere);
     }
 */
-    /*
-    public void spinnyHome() {
-        spinMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        if (SpindexIsHome()) {
-            spinMotor.setPower(0);
-            spinMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            spinMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        } else {
-            spinMotor.setPower(0.1);    // Low power/Slow
-        }
-    }
-    */
+
     /*****************************/
     //Gyro Functions
+
+    public double gyroAngle() {
+        YawPitchRollAngles YEEHAWOrientation = imu.getRobotYawPitchRollAngles();
+
+        return YEEHAWOrientation.getYaw(AngleUnit.DEGREES);
+    }
 
 }

@@ -275,6 +275,18 @@ public class Example_ParentOpMode extends LinearOpMode {
             gyroReset();
         }
     }
+
+
+        public void gripperControl(){
+        if(gamepad1.x){
+            gripperServo.setPosition(0);
+        }
+        if(gamepad1.b){
+            gripperServo.setPosition(0.4);
+
+        }
+    }
+
 */
 
 }
