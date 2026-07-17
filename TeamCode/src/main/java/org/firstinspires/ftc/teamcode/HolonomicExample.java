@@ -29,20 +29,18 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.Servo;
-
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * Original FTC opmode header block
@@ -65,9 +63,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * override the ParentOpMode runOpMode() method.
  **/
 
-@TeleOp(name="TankDrive Example", group="Linear Opmode")
+@TeleOp(name="Holonomic Example", group="Linear Opmode")
 //@Disabled
-public class TankExample extends LinearOpMode {
+public class HolonomicExample extends LinearOpMode {
 
     // Declare OpMode members, hardware variables
     public ElapsedTime runtime = new ElapsedTime();
@@ -155,8 +153,8 @@ public class TankExample extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            tankDrive();
-//            fieldCentricOmni();
+//            tankDrive();
+            fieldCentricOmni();
             Grabbingfunction();
             liftcontrol();
 
